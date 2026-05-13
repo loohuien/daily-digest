@@ -4,7 +4,7 @@ import os
 from feeds import collect_items
 from emailer import build_full_html_digest, build_email_overview, send_email
 
-FULL_DIGEST_URL = "https://loohuien.github.io/personal-digest/digest.html"
+FULL_DIGEST_URL = "https://loohuien.github.io/daily-digest/"
 
 # Collect all items
 items = collect_items()
