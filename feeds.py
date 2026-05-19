@@ -117,28 +117,16 @@ TOP_JOURNALS = [
     return papers
 
 
-def fetch_crossref_papers(limit_per_query=3):
-    papers = []
-
-    # General topic searches
-    for query in ACADEMIC_QUERIES:
-        papers.extend(fetch_crossref_query(query, limit_per_query))
-
-    # Top journal targeted searches
-    for journal in TOP_JOURNALS:
-        for query in [
-            "decentralized social media",
-            "federated social media",
-            "fediverse",
-            "Mastodon",
-            "agentic AI",
-            "AI agents",
-            "human-AI interaction",
-        ]:
-            combined_query = f"{query} {journal}"
-            papers.extend(fetch_crossref_query(combined_query, 2))
-
-    return papers
+TOP_JOURNALS = [
+    "New Media & Society",
+    "Social Media + Society",
+    "Information Communication & Society",
+    "Communication Research",
+    "Journal of Computer-Mediated Communication",
+    "Human-Computer Interaction",
+    "ACM Transactions on Computer-Human Interaction",
+    "Proceedings of the ACM on Human-Computer Interaction",
+]
 
 
 def fetch_crossref_query(query, rows=3):
@@ -181,6 +169,32 @@ def fetch_crossref_query(query, rows=3):
             "category": "Academic Papers",
             "query": query,
         })
+
+    return papers
+
+
+def fetch_crossref_papers(limit_per_query=3):
+    papers = []
+
+    # General topic searches
+    for query in ACADEMIC_QUERIES:
+        papers.extend(fetch_crossref_query(query, limit_per_query))
+
+    # Targeted searches in top journals
+    targeted_terms = [
+        "decentralized social media",
+        "federated social media",
+        "fediverse",
+        "Mastodon",
+        "agentic AI",
+        "AI agents",
+        "human-AI interaction",
+    ]
+
+    for journal in TOP_JOURNALS:
+        for term in targeted_terms:
+            combined_query = f"{term} {journal}"
+            papers.extend(fetch_crossref_query(combined_query, 2))
 
     return papers
 
