@@ -5,17 +5,17 @@ from collections import defaultdict
 
 
 ACADEMIC_QUERIES = [
-    '"decentralized social media" governance',
-    '"federated social media" moderation',
-    '"fediverse" governance',
-    '"Mastodon" content moderation',
-    '"platform decentralization" social media',
-    '"protocol governance" social media',
-    '"agentic AI" interface',
-    '"AI agents" "human-computer interaction"',
-    '"agentic interface" "user control"',
-    '"AI agents" "user agency"',
-    '"human-AI interaction" "AI agents"',
+    "decentralized social media",
+    "federated social media",
+    "fediverse governance",
+    "Mastodon moderation",
+    "platform decentralization",
+    "protocol governance",
+    "agentic AI",
+    "agentic interface",
+    "AI agents human computer interaction",
+    "human AI interaction agents",
+    "AI agents user agency",
 ]
 
 
@@ -75,6 +75,17 @@ def fetch_arxiv_papers(limit_per_query=3):
 def fetch_semantic_scholar_papers(limit_per_query=3):
     papers = []
 
+TOP_JOURNALS = [
+    "New Media & Society",
+    "Social Media + Society",
+    "Information Communication & Society",
+    "Communication Research",
+    "Journal of Computer-Mediated Communication",
+    "Human–Computer Interaction",
+    "ACM Transactions on Computer-Human Interaction",
+    "Proceedings of the ACM on Human-Computer Interaction",
+]
+
     for query in ACADEMIC_QUERIES:
         url = "https://api.semanticscholar.org/graph/v1/paper/search"
 
@@ -109,41 +120,67 @@ def fetch_semantic_scholar_papers(limit_per_query=3):
 def fetch_crossref_papers(limit_per_query=3):
     papers = []
 
+    # General topic searches
     for query in ACADEMIC_QUERIES:
-        url = "https://api.crossref.org/works"
+        papers.extend(fetch_crossref_query(query, limit_per_query))
 
-        params = {
-            "query": query.replace('"', ""),
-            "rows": limit_per_query,
-            "sort": "published",
-            "order": "desc",
-        }
+    # Top journal targeted searches
+    for journal in TOP_JOURNALS:
+        for query in [
+            "decentralized social media",
+            "federated social media",
+            "fediverse",
+            "Mastodon",
+            "agentic AI",
+            "AI agents",
+            "human-AI interaction",
+        ]:
+            combined_query = f"{query} {journal}"
+            papers.extend(fetch_crossref_query(combined_query, 2))
 
-        try:
-            response = requests.get(url, params=params, timeout=20)
-            response.raise_for_status()
-        except requests.RequestException:
-            continue
+    return papers
 
-        data = response.json()
 
-        for item in data.get("message", {}).get("items", []):
-            title_list = item.get("title", [])
-            title = title_list[0] if title_list else ""
+def fetch_crossref_query(query, rows=3):
+    papers = []
 
-            doi = item.get("DOI", "")
-            link = f"https://doi.org/{doi}" if doi else item.get("URL", "")
+    url = "https://api.crossref.org/works"
 
-            abstract = item.get("abstract", "")
+    params = {
+        "query": query.replace('"', ""),
+        "rows": rows,
+        "sort": "published",
+        "order": "desc",
+    }
 
-            papers.append({
-                "source": "Crossref",
-                "title": title.strip(),
-                "link": link,
-                "summary": abstract,
-                "category": "Academic Papers",
-                "query": query,
-            })
+    try:
+        response = requests.get(url, params=params, timeout=20)
+        response.raise_for_status()
+    except requests.RequestException:
+        return papers
+
+    data = response.json()
+
+    for item in data.get("message", {}).get("items", []):
+        title_list = item.get("title", [])
+        title = title_list[0] if title_list else ""
+
+        doi = item.get("DOI", "")
+        link = f"https://doi.org/{doi}" if doi else item.get("URL", "")
+
+        container = item.get("container-title", [])
+        journal = container[0] if container else ""
+
+        abstract = item.get("abstract", "")
+
+        papers.append({
+            "source": f"Crossref · {journal}" if journal else "Crossref",
+            "title": title.strip(),
+            "link": link,
+            "summary": abstract,
+            "category": "Academic Papers",
+            "query": query,
+        })
 
     return papers
 
