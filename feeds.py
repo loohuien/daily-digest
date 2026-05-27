@@ -112,7 +112,7 @@ def is_relevant_academic_paper(item):
     return matches >= 1
 
 
-def fetch_arxiv_papers(limit_per_query=7):
+def fetch_arxiv_papers(limit_per_query=5):
     papers = []
 
     for query in ACADEMIC_QUERIES:
@@ -138,7 +138,7 @@ def fetch_arxiv_papers(limit_per_query=7):
     return papers
 
 
-def fetch_semantic_scholar_papers(limit_per_query=5):
+def fetch_semantic_scholar_papers(limit_per_query=3):
     papers = []
 
     for query in ACADEMIC_QUERIES:
