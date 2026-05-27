@@ -5,16 +5,15 @@ from collections import defaultdict
 
 
 ACADEMIC_QUERIES = [
-    "decentralized social media",
-    "federated social media",
     "fediverse governance",
-    "Mastodon moderation",
-    "platform decentralization",
-    "protocol governance",
-    "agentic AI",
-    "agentic interface",
-    "AI agents human computer interaction",
-    "human AI interaction agents",
+    "fediverse moderation",
+    "Mastodon content moderation",
+    "Mastodon governance",
+    "decentralized social media governance",
+    "federated social media moderation",
+    "agentic AI interface",
+    "agentic AI user control",
+    "AI agents human-AI interaction",
     "AI agents user agency",
 ]
 
@@ -31,20 +30,41 @@ TOP_JOURNALS = [
 ]
 
 
+REQUIRED_ACADEMIC_TERMS = [
+    "decentralized social media",
+    "federated social media",
+    "fediverse",
+    "mastodon",
+    "content moderation",
+    "agentic ai",
+    "ai agent",
+    "ai agents",
+    "agentic interface",
+    "human-ai interaction",
+    "human computer interaction",
+    "user agency",
+    "user control",
+]
+
+
 NEWS_FEEDS = {
+    # AI labs
     "OpenAI News": "https://openai.com/news/rss.xml",
     "Google DeepMind Blog": "https://deepmind.google/blog/rss.xml",
     "Anthropic News": "https://www.anthropic.com/news/rss.xml",
 
+    # Tech news
     "MIT Technology Review": "https://www.technologyreview.com/feed/",
     "The Verge AI": "https://www.theverge.com/rss/ai-artificial-intelligence/index.xml",
     "Ars Technica": "https://feeds.arstechnica.com/arstechnica/index",
     "WIRED AI": "https://www.wired.com/feed/tag/ai/latest/rss",
 
+    # Singapore / policy
     "CNA Singapore": "https://www.channelnewsasia.com/api/v1/rss-outbound-feed?_format=xml",
     "Gov.sg": "https://www.gov.sg/rss",
     "MAS Singapore": "https://www.mas.gov.sg/rss/news",
 
+    # Chambana
     "Illinois News Bureau": "https://news.illinois.edu/view/rss/6367",
     "Smile Politely": "https://www.smilepolitely.com/feed/",
     "WCIA": "https://www.wcia.com/feed/",
@@ -52,6 +72,16 @@ NEWS_FEEDS = {
 
 
 MAX_ITEMS_PER_SOURCE_PER_SECTION = 3
+
+
+def is_relevant_academic_paper(item):
+    text = (
+        item.get("title", "") + " " +
+        item.get("summary", "") + " " +
+        item.get("query", "")
+    ).lower()
+
+    return any(term in text for term in REQUIRED_ACADEMIC_TERMS)
 
 
 def fetch_arxiv_papers(limit_per_query=3):
@@ -165,10 +195,10 @@ def fetch_crossref_papers(limit_per_query=3):
         papers.extend(fetch_crossref_query(query, limit_per_query))
 
     targeted_terms = [
-        "decentralized social media",
-        "federated social media",
         "fediverse",
         "Mastodon",
+        "decentralized social media",
+        "federated social media",
         "agentic AI",
         "AI agents",
         "human-AI interaction",
@@ -262,9 +292,17 @@ def limit_source_dominance(items):
 def collect_items():
     items = []
 
-    items.extend(fetch_arxiv_papers())
-    items.extend(fetch_semantic_scholar_papers())
-    items.extend(fetch_crossref_papers())
+    academic_items = []
+    academic_items.extend(fetch_arxiv_papers())
+    academic_items.extend(fetch_semantic_scholar_papers())
+    academic_items.extend(fetch_crossref_papers())
+
+    academic_items = [
+        item for item in academic_items
+        if is_relevant_academic_paper(item)
+    ]
+
+    items.extend(academic_items)
     items.extend(fetch_news())
 
     items = deduplicate_items(items)
