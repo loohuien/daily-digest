@@ -93,7 +93,7 @@ NEWS_FEEDS = {
 }
 
 
-MAX_ITEMS_PER_SOURCE_PER_SECTION = 3
+MAX_ITEMS_PER_SOURCE_PER_SECTION = 5
 
 
 def is_relevant_academic_paper(item):
@@ -103,10 +103,16 @@ def is_relevant_academic_paper(item):
         item.get("query", "")
     ).lower()
 
-    return any(term in text for term in REQUIRED_ACADEMIC_TERMS)
+    matches = sum(
+        1 for term in REQUIRED_ACADEMIC_TERMS
+        if term in text
+    )
+
+    # Require at least ONE relevant term instead of many
+    return matches >= 1
 
 
-def fetch_arxiv_papers(limit_per_query=3):
+def fetch_arxiv_papers(limit_per_query=7):
     papers = []
 
     for query in ACADEMIC_QUERIES:
@@ -210,7 +216,7 @@ def fetch_crossref_query(query, rows=3):
     return papers
 
 
-def fetch_crossref_papers(limit_per_query=3):
+def fetch_crossref_papers(limit_per_query=5):
     papers = []
 
     for query in ACADEMIC_QUERIES:
