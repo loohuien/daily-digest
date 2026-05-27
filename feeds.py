@@ -19,31 +19,39 @@ ACADEMIC_QUERIES = [
 ]
 
 
+TOP_JOURNALS = [
+    "New Media & Society",
+    "Social Media + Society",
+    "Information Communication & Society",
+    "Communication Research",
+    "Journal of Computer-Mediated Communication",
+    "Human-Computer Interaction",
+    "ACM Transactions on Computer-Human Interaction",
+    "Proceedings of the ACM on Human-Computer Interaction",
+]
+
+
 NEWS_FEEDS = {
-    # AI labs
     "OpenAI News": "https://openai.com/news/rss.xml",
     "Google DeepMind Blog": "https://deepmind.google/blog/rss.xml",
     "Anthropic News": "https://www.anthropic.com/news/rss.xml",
 
-    # Tech news
     "MIT Technology Review": "https://www.technologyreview.com/feed/",
     "The Verge AI": "https://www.theverge.com/rss/ai-artificial-intelligence/index.xml",
     "Ars Technica": "https://feeds.arstechnica.com/arstechnica/index",
     "WIRED AI": "https://www.wired.com/feed/tag/ai/latest/rss",
 
-    # Singapore news / policy
     "CNA Singapore": "https://www.channelnewsasia.com/api/v1/rss-outbound-feed?_format=xml",
     "Gov.sg": "https://www.gov.sg/rss",
     "MAS Singapore": "https://www.mas.gov.sg/rss/news",
 
-    # Chambana / Illinois
     "Illinois News Bureau": "https://news.illinois.edu/view/rss/6367",
     "Smile Politely": "https://www.smilepolitely.com/feed/",
     "WCIA": "https://www.wcia.com/feed/",
 }
 
 
-MAX_ITEMS_PER_SOURCE_PER_SECTION = 2
+MAX_ITEMS_PER_SOURCE_PER_SECTION = 3
 
 
 def fetch_arxiv_papers(limit_per_query=3):
@@ -72,25 +80,14 @@ def fetch_arxiv_papers(limit_per_query=3):
     return papers
 
 
-def fetch_semantic_scholar_papers(limit_per_query=3):
+def fetch_semantic_scholar_papers(limit_per_query=5):
     papers = []
-
-TOP_JOURNALS = [
-    "New Media & Society",
-    "Social Media + Society",
-    "Information Communication & Society",
-    "Communication Research",
-    "Journal of Computer-Mediated Communication",
-    "Human–Computer Interaction",
-    "ACM Transactions on Computer-Human Interaction",
-    "Proceedings of the ACM on Human-Computer Interaction",
-]
 
     for query in ACADEMIC_QUERIES:
         url = "https://api.semanticscholar.org/graph/v1/paper/search"
 
         params = {
-            "query": query.replace('"', ""),
+            "query": query,
             "limit": limit_per_query,
             "fields": "title,abstract,url,year,authors,citationCount,publicationDate",
         }
@@ -117,25 +114,13 @@ TOP_JOURNALS = [
     return papers
 
 
-TOP_JOURNALS = [
-    "New Media & Society",
-    "Social Media + Society",
-    "Information Communication & Society",
-    "Communication Research",
-    "Journal of Computer-Mediated Communication",
-    "Human-Computer Interaction",
-    "ACM Transactions on Computer-Human Interaction",
-    "Proceedings of the ACM on Human-Computer Interaction",
-]
-
-
 def fetch_crossref_query(query, rows=3):
     papers = []
 
     url = "https://api.crossref.org/works"
 
     params = {
-        "query": query.replace('"', ""),
+        "query": query,
         "rows": rows,
         "sort": "published",
         "order": "desc",
@@ -176,11 +161,9 @@ def fetch_crossref_query(query, rows=3):
 def fetch_crossref_papers(limit_per_query=3):
     papers = []
 
-    # General topic searches
     for query in ACADEMIC_QUERIES:
         papers.extend(fetch_crossref_query(query, limit_per_query))
 
-    # Targeted searches in top journals
     targeted_terms = [
         "decentralized social media",
         "federated social media",
