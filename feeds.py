@@ -83,7 +83,7 @@ def fetch_arxiv_papers(limit_per_query=3):
 def fetch_semantic_scholar_papers(limit_per_query=5):
     papers = []
 
-    for query in ACADEMIC_QUERIES:
+for query in ACADEMIC_QUERIES:
         url = "https://api.semanticscholar.org/graph/v1/paper/search"
 
         params = {
